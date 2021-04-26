@@ -6,14 +6,14 @@
 #    By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 13:46:17 by alagroy-          #+#    #+#              #
-#    Updated: 2021/04/23 14:22:52 by alagroy-         ###   ########.fr        #
+#    Updated: 2021/04/26 14:32:54 by alagroy-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = woody_woodpacker
 
-CC = clang
-CFLAGS = -Wall -Werror -Wextra -g #-fsanitize=address
+CC = gcc
+CFLAGS = -Wall -Werror -Wextra -g#-fsanitize=address
 CFLAGS += $(addprefix -I , $(INCLUDES))
 
 INCLUDES_DIR = ./includes/
@@ -23,7 +23,7 @@ INCLUDES = $(INCLUDES_DIR) $(LIB_DIR)includes/
 OBJS_DIR = ./.objs/
 LIBFT = $(LIB_DIR)libft.a
 
-SRC_FILES = main.c
+SRC_FILES = main.c check_file.c error.c endian.c
 OBJ_FILES = $(SRC_FILES:.c=.o)
 SRCS = $(addprefix $(SRCS_DIR), $(SRC_FILES))
 OBJS = $(addprefix $(OBJS_DIR), $(OBJ_FILES))
