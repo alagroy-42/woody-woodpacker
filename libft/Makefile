@@ -6,13 +6,13 @@
 #    By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/09/17 17:52:36 by alagroy-          #+#    #+#              #
-#    Updated: 2021/04/02 13:06:50 by alagroy-         ###   ########.fr        #
+#    Updated: 2021/04/27 10:45:18 by alagroy-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = libft.a
 
-CC = clang
+CC = gcc
 
 SRCS = ft_strcat.c ft_strchr.c ft_strcmp.c ft_strcpy.c ft_strdup.c \
 	   ft_strlcat.c ft_strlen.c ft_strncmp.c ft_strncpy.c ft_strnstr.c \

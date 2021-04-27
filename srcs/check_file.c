@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/26 12:10:25 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/26 14:43:33 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/04/27 14:49:24 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,10 @@ static int	parse_header(t_file *file, int *error)
 	file->endian = ident[EI_DATA];
 	if (ft_memcmp(magic, ident, 4) || ident[EI_CLASS] == ELFCLASSNONE
 		|| ident[EI_DATA] == ELFDATANONE || ident[EI_VERSION] == EV_NONE
-		|| !(header->e_machine == EM_386 || header->e_machine == EM_X86_64)
-		|| get_uint32(header->e_version, file->endian) == EV_NONE)
+		|| !(get_uint16(header->e_machine, file->endian) == EM_386
+			|| get_uint16(header->e_machine, file->endian) == EM_X86_64)
+		|| get_uint32(header->e_version, file->endian) == EV_NONE
+		|| get_uint16(header->e_phnum, file->endian) == 0)
 	{
 		*error = E_INVALID;
 		return (EXIT_FAILURE);
@@ -35,7 +37,7 @@ static int	parse_header(t_file *file, int *error)
 		*error = E_NOEXEC;
 		return (EXIT_FAILURE);
 	}
-	return (EXIT_SUCCESS);	
+	return (EXIT_SUCCESS);
 }
 
 int			check_file(char *filename, t_file *file, int *error)
@@ -45,7 +47,7 @@ int			check_file(char *filename, t_file *file, int *error)
 		*error = E_NOFILE;
 		return (EXIT_FAILURE);
 	}
-	if ((file->size = lseek(file->fd, 0, SEEK_END)) == (off_t)-1)
+	if ((file->size = lseek(file->fd, 0, SEEK_END)) == (off_t)(-1))
 	{
 		*error = E_NOFILE;
 		return (EXIT_FAILURE);
@@ -56,5 +58,6 @@ int			check_file(char *filename, t_file *file, int *error)
 		*error = E_NOMEM;
 		return (EXIT_FAILURE);
 	}
-	return (parse_header(file, error));	
+	file->end = file->ptr + file->size;
+	return (parse_header(file, error));
 }

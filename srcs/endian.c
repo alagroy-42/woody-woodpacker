@@ -6,11 +6,18 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/05 12:31:20 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/26 14:42:29 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/04/27 10:55:45 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "woody.h"
+
+uint16_t		get_uint16(uint16_t byte, t_endian endian)
+{
+	if (endian == LENDIAN)
+		return (byte);
+	return ((byte << 8) | (byte >> 8));
+}
 
 uint32_t		get_uint32(uint32_t byte, t_endian endian)
 {
