@@ -1,26 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   decryption.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/23 14:06:20 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/29 15:54:45 by alagroy-         ###   ########.fr       */
+/*   Created: 2021/04/29 15:54:16 by alagroy-          #+#    #+#             */
+/*   Updated: 2021/04/29 15:57:19 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "woody.h"
 
-int			main(int ac, char **av)
+void		save_file(t_file *file)
 {
-	t_file	file;
+	int		fd;
 
-	ft_bzero(&file, sizeof(t_file));
-	errno = -1;
-	if (ac != 2 || check_file(av[1], &file) == EXIT_FAILURE)
-		woody_error(&file);
-	encrypt_code(&file);
-	save_file(&file);
-	return (0);
+	errno = 0;
+	if ((fd = open("woody", O_WRONLY | O_CREAT | O_TRUNC, 0755)) == -1)
+		return ;
+	write(fd, file->ptr, file->size);
+	close(fd);
 }
