@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/27 12:39:27 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/27 15:19:17 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/04/29 14:02:24 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static char		*get_section_strtab(t_file *file)
 	return (file->ptr + section[index].sh_offset);
 }
 
-Elf64_Shdr		*get_code_shdr(t_file *file)
+void			get_shdrs(t_file *file)
 {
 	Elf64_Shdr	*section;
 	uint16_t	nb_sects;
@@ -39,9 +39,11 @@ Elf64_Shdr		*get_code_shdr(t_file *file)
 	section = file->ptr + ((Elf64_Ehdr *)file->ptr)->e_shoff;
 	nb_sects = ((Elf64_Ehdr *)file->ptr)->e_shnum;
 	if (!(strtab = get_section_strtab(file)))
-		return (NULL);
+		return ;
 	while (++i < nb_sects && (void *)(section + i) < file->end)
 		if (!ft_strcmp(".text", strtab + section[i].sh_name))
-			return (section + i);
-	return (NULL);
+			file->text = section + i;
+		else if (!ft_strcmp(".data", strtab + section[i].sh_name))
+			file->data = section + i;
+	return ;
 }
