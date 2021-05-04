@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/27 12:39:27 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/29 14:02:24 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/05 17:41:55 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void			get_shdrs(t_file *file)
 	while (++i < nb_sects && (void *)(section + i) < file->end)
 		if (!ft_strcmp(".text", strtab + section[i].sh_name))
 			file->text = section + i;
-		else if (!ft_strcmp(".data", strtab + section[i].sh_name))
+		else if (!ft_strcmp(".rodata", strtab + section[i].sh_name))
 			file->data = section + i;
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/23 14:06:20 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/29 15:54:45 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/04 14:28:31 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,6 @@ int			main(int ac, char **av)
 	if (ac != 2 || check_file(av[1], &file) == EXIT_FAILURE)
 		woody_error(&file);
 	encrypt_code(&file);
-	save_file(&file);
+	inject_decryption_routine(&file);
 	return (0);
 }

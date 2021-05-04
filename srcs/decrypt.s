@@ -11,8 +11,8 @@ decrypt:
 	push r9
 	mov rcx, 43 ; text_size
 	mov rsi, 43 ; data_size 
-	lea rdi, [43] ; data
-	lea rdx, [43] ; text
+	lea rdx, [rel routine] ; text
+	lea rdi, [rel routine] ; data
 	xor r8, r8 ; data_index
 	xor r9, r9 ; data_offset
 routine:
@@ -27,6 +27,13 @@ routine:
 	xor r8, r8
 loopinstr:
 	loop routine
+	jmp woody
+end_code:
+	pop rsi
+	mov rax, 1
+	mov rdi, 1
+	mov rdx, 14
+	syscall
 	pop r9
 	pop r8
 	pop rdi
@@ -34,4 +41,9 @@ loopinstr:
 	pop rdx
 	pop rcx
 	pop rax
-	jmp 43;entrypoint
+	jmp go_back;entrypoint
+woody:
+	call end_code
+	woody_str: db "....WOODY....", 10
+go_back:
+	jmp 42

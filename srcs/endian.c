@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/05 12:31:20 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/04/27 10:55:45 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/05 09:24:31 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,14 @@ uint32_t		get_uint32(uint32_t byte, t_endian endian)
 		return (byte);
 	byte = ((byte << 8) & 0xFF00FF00) | ((byte >> 8) & 0xFF00FF);
 	return (byte << 16) | (byte >> 16);
+}
+
+int32_t			get_int32(int32_t byte, t_endian endian)
+{
+	if (endian == LENDIAN)
+		return (byte);
+	byte = ((byte << 8) & 0xFF00FF00) | ((byte >> 8) & 0xFF00FF ); 
+    return (byte << 16) | ((byte >> 16) & 0xFFFF);
 }
 
 uint64_t		get_uint64(uint64_t byte, t_endian endian)
