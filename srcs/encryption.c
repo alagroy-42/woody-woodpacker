@@ -6,30 +6,34 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/29 13:49:16 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/04 14:57:21 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/11 13:07:02 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "woody.h"
 
+static void	get_key(t_file *file)
+{
+	file->key = syscall(SYS_time, NULL);
+}
+
 void		encrypt_code(t_file *file)
 {
 	void		*text;
-	void		*data;
+	void		*key;
 	uint32_t	text_size;
-	uint32_t	data_size;
+	uint32_t	key_size;
 
-	get_shdrs(file);
-	if (!file->text || !file->data)
+	get_text_sect(file);
+	if (!file->text)
 		return ;
 	text = file->ptr + get_uint64(((Elf64_Shdr *)file->text)->sh_offset,
 		file->endian);
 	text_size = get_uint64(((Elf64_Shdr *)file->text)->sh_size, file->endian);
-	data = file->ptr + get_uint64(((Elf64_Shdr *)file->data)->sh_offset,
-		file->endian);
-	data_size = get_uint64(((Elf64_Shdr *)file->data)->sh_size, file->endian);
-	if (text > file->end || data > file->end || text + text_size > file->end
-			|| data + data_size > file->end)
+	get_key(file);
+	key = &file->key;
+	key_size = sizeof(time_t);
+	if (text > file->end || text + text_size > file->end)
 		return ;
-	encrypt(data, data_size, text, text_size);
+	encrypt(key, key_size, text, text_size);
 }

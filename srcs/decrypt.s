@@ -10,11 +10,13 @@ decrypt:
 	push r8
 	push r9
 	mov rcx, 43 ; text_size
-	mov rsi, 43 ; data_size 
+	mov rsi, 4 ; data_size 
 	lea rdx, [rel routine] ; text
-	lea rdi, [rel routine] ; data
 	xor r8, r8 ; data_index
 	xor r9, r9 ; data_offset
+	jmp key
+back_key:
+	pop rdi ; data
 routine:
 	movzx rax, byte [rdi + r8]
 	add rax, r9
@@ -42,6 +44,9 @@ end_code:
 	pop rcx
 	pop rax
 	jmp go_back;entrypoint
+key:
+	call back_key
+	key_str: db '    '
 woody:
 	call end_code
 	woody_str: db "....WOODY....", 10
