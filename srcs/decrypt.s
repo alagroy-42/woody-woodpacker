@@ -1,22 +1,31 @@
-segment .text
-	global decrypt
+BITS 64
 
-decrypt:
+segment .text
+	global test
+
+test:
 	push rax
-	push rcx
-	push rdx
 	push rsi
 	push rdi
+	push rdx
+	push rcx
 	push r8
 	push r9
+	jmp woody
+end_code:
+	pop rsi
+	mov rax, 1
+	mov rdi, 1
+	mov rdx, 14
+	syscall
 	mov rcx, 43 ; text_size
-	mov rsi, 4 ; data_size 
+	mov rsi, 4 ; key_size 
 	lea rdx, [rel routine] ; text
-	xor r8, r8 ; data_index
-	xor r9, r9 ; data_offset
+	xor r8, r8 ; key_index
+	xor r9, r9 ; key_offset
 	jmp key
 back_key:
-	pop rdi ; data
+	pop rdi ; key
 routine:
 	movzx rax, byte [rdi + r8]
 	add rax, r9
@@ -29,26 +38,17 @@ routine:
 	xor r8, r8
 loopinstr:
 	loop routine
-	jmp woody
-end_code:
-	pop rsi
-	mov rax, 1
-	mov rdi, 1
-	mov rdx, 14
-	syscall
 	pop r9
 	pop r8
+	pop rcx
+	pop rdx
 	pop rdi
 	pop rsi
-	pop rdx
-	pop rcx
 	pop rax
-	jmp go_back;entrypoint
-key:
-	call back_key
-	key_str: db '    '
+	jmp 42
 woody:
 	call end_code
 	woody_str: db "....WOODY....", 10
-go_back:
-	jmp 42
+key:
+	call back_key
+	key_str: db '    '

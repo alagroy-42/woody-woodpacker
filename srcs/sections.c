@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/27 12:39:27 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/12 14:57:59 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/14 10:37:38 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,11 +51,17 @@ void			format_payload(t_file *file, t_payload *payload,
 {
 	uint32_t	last_entry;
 	int32_t		rel_entry;
+	int32_t		rel_text;
 	Elf64_Ehdr	*hdr;
 
 	hdr = file->ptr;
 	last_entry = hdr->e_entry;
 	rel_entry = last_entry - (sect->sh_addr + payload->i_jmp + sizeof(int32_t));
+	rel_text = ((Elf64_Shdr *)file->text)->sh_addr - (sect->sh_addr + payload->i_text + sizeof(int32_t));
+	ft_memcpy(payload->code + payload->i_tsize, &((Elf64_Shdr *)file->text)->sh_size,
+			sizeof(uint32_t));
+	ft_memcpy(payload->code + payload->i_key, &file->key, sizeof(time_t));
+	ft_memcpy(payload->code + payload->i_text, &rel_text, sizeof(int32_t));
 	ft_memcpy(payload->code + payload->i_jmp, &rel_entry, sizeof(int32_t));
 }
 
@@ -90,6 +96,7 @@ void			add_section(t_file *file, t_payload *payload)
 	code = (char *)(sect + 1);
 	ft_memcpy(sect, file->text, sizeof(Elf64_Shdr));
 	extend_last_load_segment(file, payload, &addr_offset);
+	give_text_write_right(file);
 	update_section(sect, file, payload, addr_offset);
 	format_payload(file, payload, sect);
 	update_header(file, sect);

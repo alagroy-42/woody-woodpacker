@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/10 12:07:31 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/12 14:11:11 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/14 10:07:30 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,25 @@ void		extend_last_load_segment(t_file *file, t_payload *payload,
 	if (!(seg->p_flags & PF_X))
 		seg->p_flags |= PF_X;
 	*addr_off = seg->p_vaddr - seg->p_offset;
+}
+
+void		give_text_write_right(t_file *file)
+{
+	Elf64_Phdr	*phdrs;
+	uint16_t	size;
+	uint16_t	i;
+
+	i = -1;
+	size = ((Elf64_Ehdr *)file->ptr)->e_phnum;
+	phdrs = file->ptr + ((Elf64_Ehdr *)file->ptr)->e_phoff;
+	while (++i < size)
+	{
+		if (phdrs[i].p_type == PT_LOAD && phdrs[i].p_flags & PF_X
+				&& phdrs[i].p_flags & PF_R)
+		{
+			phdrs[i].p_flags |= PF_W;
+			return ;
+		}
+	}
+	return ;
 }

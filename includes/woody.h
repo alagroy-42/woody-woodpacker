@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/23 14:05:40 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/12 14:09:42 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/14 10:26:38 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,9 @@ typedef struct		s_payload
 	char		*code;
 	size_t		size;
 	uint16_t	i_jmp;
+	uint16_t	i_tsize;
+	uint16_t	i_text;
+	uint16_t	i_key;
 }					t_payload;
 
 extern void			encrypt(void *data, uint32_t data_len, void *text,
@@ -74,4 +77,6 @@ Elf64_Phdr			*get_segment(t_file *file, int (*f)(Elf64_Phdr *));
 void				override_note_seg(t_file *file);
 void				extend_last_load_segment(t_file *file, t_payload *payload,
 						off_t *addr_off);
+void				give_text_write_right(t_file *file);
+
 #endif
