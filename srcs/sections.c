@@ -6,13 +6,13 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/27 12:39:27 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/14 10:37:38 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/20 15:35:56 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "woody.h"
 
-static char		*get_section_strtab(t_file *file)
+char			*get_section_strtab(t_file *file)
 {
 	Elf64_Ehdr	*header;
 	Elf64_Shdr	*section;
@@ -46,61 +46,8 @@ void			get_text_sect(t_file *file)
 	return ;
 }
 
-void			format_payload(t_file *file, t_payload *payload,
-					Elf64_Shdr *sect)
+Elf64_Shdr		*get_last_section(t_file *file)
 {
-	uint32_t	last_entry;
-	int32_t		rel_entry;
-	int32_t		rel_text;
-	Elf64_Ehdr	*hdr;
-
-	hdr = file->ptr;
-	last_entry = hdr->e_entry;
-	rel_entry = last_entry - (sect->sh_addr + payload->i_jmp + sizeof(int32_t));
-	rel_text = ((Elf64_Shdr *)file->text)->sh_addr - (sect->sh_addr + payload->i_text + sizeof(int32_t));
-	ft_memcpy(payload->code + payload->i_tsize, &((Elf64_Shdr *)file->text)->sh_size,
-			sizeof(uint32_t));
-	ft_memcpy(payload->code + payload->i_key, &file->key, sizeof(time_t));
-	ft_memcpy(payload->code + payload->i_text, &rel_text, sizeof(int32_t));
-	ft_memcpy(payload->code + payload->i_jmp, &rel_entry, sizeof(int32_t));
-}
-
-void			update_header(t_file *file, Elf64_Shdr *sect)
-{
-	Elf64_Ehdr	*hdr;
-
-	hdr = file->ptr;
-	hdr->e_shnum++;
-	hdr->e_entry = sect->sh_addr;
-}
-
-void			update_section(Elf64_Shdr *sect, t_file *file,
-					t_payload *payload, off_t addr_offset)
-{
-	sect->sh_offset = file->size + sizeof(Elf64_Shdr);
-	sect->sh_addr = sect->sh_offset + addr_offset;
-	sect->sh_size = payload->size;
-}
-
-void			add_section(t_file *file, t_payload *payload)
-{
-	Elf64_Shdr	*sect;
-	off_t		addr_offset;
-	void		*map;
-	char		*code;
-
-	if (!(map = malloc(sizeof(Elf64_Shdr) + payload->size + 1)))
-		return ;
-	get_text_sect(file);
-	sect = map;
-	code = (char *)(sect + 1);
-	ft_memcpy(sect, file->text, sizeof(Elf64_Shdr));
-	extend_last_load_segment(file, payload, &addr_offset);
-	give_text_write_right(file);
-	update_section(sect, file, payload, addr_offset);
-	format_payload(file, payload, sect);
-	update_header(file, sect);
-	ft_memcpy(code, payload->code, payload->size);
-	code[payload->size] = 0;
-	save_file(file, map, payload->size + sizeof(Elf64_Shdr) + 1);
+	return ((Elf64_Shdr *)(file->ptr + ((Elf64_Ehdr *)file->ptr)->e_shoff)
+		+ ((Elf64_Ehdr *)file->ptr)->e_shnum - 1);
 }

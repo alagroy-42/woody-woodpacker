@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/23 14:05:40 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/14 10:26:38 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/20 15:36:09 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ uint32_t			get_uint32(uint32_t byte, t_endian endian);
 uint64_t			get_uint64(uint64_t byte, t_endian endian);
 void				get_text_sect(t_file *file);
 void				encrypt_code(t_file *file);
-void				inject_decryption_routine(t_file *file);
 void				save_file(t_file *file, char *appen, size_t map_size);
 int					is_text(Elf64_Phdr *phdr);
 int					is_note(Elf64_Phdr *phdr);
@@ -78,5 +77,8 @@ void				override_note_seg(t_file *file);
 void				extend_last_load_segment(t_file *file, t_payload *payload,
 						off_t *addr_off);
 void				give_text_write_right(t_file *file);
+Elf64_Shdr			*get_last_section(t_file *file);
+void				inject(t_file *file, t_payload *payload);
+char				*get_section_strtab(t_file *file);
 
 #endif
