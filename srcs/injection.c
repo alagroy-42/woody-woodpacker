@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/20 14:17:38 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/20 16:04:41 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/21 10:30:02 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void			format_payload(t_file *file, t_payload *payload,
 	rel_text = ((Elf64_Shdr *)file->text)->sh_addr - (entry_addr + payload->i_text + sizeof(int32_t));
 	ft_memcpy(payload->code + payload->i_tsize, &((Elf64_Shdr *)file->text)->sh_size,
 			sizeof(uint32_t));
-	ft_memcpy(payload->code + payload->i_key, &file->key, sizeof(time_t));
+	ft_memcpy(payload->code + payload->i_key, &file->key, KEY_SIZE);
 	ft_memcpy(payload->code + payload->i_text, &rel_text, sizeof(int32_t));
 	ft_memcpy(payload->code + payload->i_jmp, &rel_entry, sizeof(int32_t));
 }

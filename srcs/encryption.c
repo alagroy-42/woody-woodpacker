@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/29 13:49:16 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/20 17:05:31 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/21 13:41:18 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,19 @@
 
 static void	get_key(t_file *file)
 {
-	file->key = syscall(SYS_time, NULL);
+	int		fd;
+	int		i;
+
+	if ((fd = open("/dev/urandom", O_RDONLY)) == -1)
+		perror("imposible to generate key : /dev/urandom:");
+	read(fd, file->key, KEY_SIZE);
+	close(fd);
+	ft_putstr("encryption key : 0x");
+	i = -1;
+	while (++i < KEY_SIZE)
+		printf("%hhx", file->key[i]);
+	fflush(NULL);
+	ft_putchar('\n');
 }
 
 void		encrypt_code(t_file *file)
