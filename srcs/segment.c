@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/10 12:07:31 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/18 14:09:00 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/27 13:33:21 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@ int			is_text(Elf64_Phdr *phdr)
 			&& phdr->p_flags & PF_R);
 }
 
-int			is_note(Elf64_Phdr *phdr)
+int			is_data(Elf64_Phdr *phdr)
 {
-	return (phdr->p_type == PT_NOTE);
+	return (phdr->p_type == PT_LOAD && phdr->p_filesz != phdr->p_memsz);
 }
 
 Elf64_Phdr	*get_segment(t_file *file, int (*f)(Elf64_Phdr *))

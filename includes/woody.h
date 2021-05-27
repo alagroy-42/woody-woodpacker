@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/23 14:05:40 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/21 10:32:33 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/27 13:53:02 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,16 @@ typedef struct		s_payload
 	uint16_t	i_key;
 }					t_payload;
 
+typedef struct 		s_woody
+{
+	void		*ptr;
+	size_t		size;
+	Elf64_Phdr	*data;
+	Elf64_Phdr	*last;
+	Elf64_Addr	entry;
+}					t_woody;
+
+
 extern void			encrypt(void *data, uint32_t data_len, void *text,
 						uint32_t text_len);
 int					check_file(char *filename, t_file *file);
@@ -72,7 +82,7 @@ void				get_text_sect(t_file *file);
 void				encrypt_code(t_file *file);
 void				save_file(t_file *file, char *appen, size_t map_size);
 int					is_text(Elf64_Phdr *phdr);
-int					is_note(Elf64_Phdr *phdr);
+int					is_data(Elf64_Phdr *phdr);
 Elf64_Phdr			*get_segment(t_file *file, int (*f)(Elf64_Phdr *));
 void				override_note_seg(t_file *file);
 void				extend_last_load_segment(t_file *file, t_payload *payload,
@@ -81,5 +91,7 @@ void				give_text_write_right(t_file *file);
 Elf64_Shdr			*get_last_section(t_file *file);
 void				inject(t_file *file, t_payload *payload);
 char				*get_section_strtab(t_file *file);
+Elf64_Shdr			*get_section(t_file *file, char *name);
+Elf64_Phdr			*get_last_load_segment(t_file *file);
 
 #endif

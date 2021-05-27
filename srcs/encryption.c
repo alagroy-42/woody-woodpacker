@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/29 13:49:16 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/21 13:41:18 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/27 15:14:07 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,12 @@ void		encrypt_code(t_file *file)
 	uint32_t	text_size;
 	uint32_t	key_size;
 
-	get_text_sect(file);
-	if (!file->text)
+	if (!(file->text = get_segment(file, is_text)))
 		return ;
-	text = file->ptr + get_uint64(((Elf64_Shdr *)file->text)->sh_offset,
+	((Elf64_Phdr *)file->text)->p_flags |= PF_W;
+	text = file->ptr + get_uint64(((Elf64_Phdr *)file->text)->p_offset,
 		file->endian);
-	text_size = get_uint64(((Elf64_Shdr *)file->text)->sh_size, file->endian);
+	text_size = get_uint64(((Elf64_Phdr *)file->text)->p_filesz, file->endian);
 	get_key(file);
 	key = &file->key;
 	key_size = sizeof(time_t);

@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/27 12:39:27 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/20 15:35:56 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/27 11:45:45 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,24 @@ void			get_text_sect(t_file *file)
 		if (!ft_strcmp(".text", strtab + section[i].sh_name))
 			file->text = section + i;
 	return ;
+}
+
+Elf64_Shdr		*get_section(t_file *file, char *name)
+{
+	Elf64_Shdr	*section;
+	uint16_t	nb_sects;
+	char		*strtab;
+	uint16_t	i;
+
+	i = -1;
+	section = file->ptr + ((Elf64_Ehdr *)file->ptr)->e_shoff;
+	nb_sects = ((Elf64_Ehdr *)file->ptr)->e_shnum;
+	if (!(strtab = get_section_strtab(file)))
+		return (NULL);
+	while (++i < nb_sects && (void *)(section + i) < file->end)
+		if (!ft_strcmp(name, strtab + section[i].sh_name))
+			return (section + i);
+	return (NULL);
 }
 
 Elf64_Shdr		*get_last_section(t_file *file)
