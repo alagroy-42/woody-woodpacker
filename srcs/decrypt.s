@@ -51,4 +51,4 @@ woody:
 	woody_str: db "....WOODY....", 10
 key:
 	call back_key
-	key_str: db '    '
+	key_str: db ''

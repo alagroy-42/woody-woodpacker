@@ -6,46 +6,77 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/20 14:17:38 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/27 15:22:07 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/05/28 15:15:45 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "woody.h"
 
-void			format_payload(t_file *file, t_payload *payload,
+static int	save_file(char *woody, size_t size)
+{
+	int		fd;
+
+	errno = 0;
+	if ((fd = open("woody.tmp", O_WRONLY | O_CREAT | O_TRUNC, 0755)) == -1)
+		return (EXIT_FAILURE);
+	if (syscall(SYS_rename, "woody.tmp", "woody"))
+		return (EXIT_FAILURE);
+	write(fd, woody, size);
+	close(fd);
+	syscall(SYS_unlink, "woody.tmp");
+	return (EXIT_SUCCESS);
+}
+
+static void	format_payload(t_file *file, t_payload *payload,
 					Elf64_Addr entry_addr)
 {
 	uint32_t	last_entry;
 	int32_t		rel_entry;
 	int32_t		rel_text;
+	uint32_t	key_size;
+	uint64_t	filesz;
 	Elf64_Ehdr	*hdr;
 
 	hdr = file->ptr;
-	last_entry = hdr->e_entry;
+	last_entry = get_uint64(hdr->e_entry, file->endian);
 	rel_entry = last_entry - (entry_addr + payload->i_jmp + sizeof(int32_t));
-	rel_text = ((Elf64_Phdr *)file->text)->p_vaddr - (entry_addr + payload->i_text + sizeof(int32_t));
-	ft_memcpy(payload->code + payload->i_tsize, &((Elf64_Phdr *)file->text)->p_filesz,
-			sizeof(uint32_t));
+	rel_text = get_uint64(((Elf64_Phdr *)file->text)->p_vaddr, file->endian) - (entry_addr + payload->i_text + sizeof(int32_t));
+	filesz = get_uint64(((Elf64_Phdr *)file->text)->p_filesz, file->endian);
+	key_size = KEY_SIZE;
+	ft_memcpy(payload->code + payload->i_tsize, &filesz, sizeof(uint32_t));
+	ft_memcpy(payload->code + payload->i_ksize, &key_size, sizeof(uint32_t));
 	ft_memcpy(payload->code + payload->i_key, &file->key, KEY_SIZE);
 	ft_memcpy(payload->code + payload->i_text, &rel_text, sizeof(int32_t));
 	ft_memcpy(payload->code + payload->i_jmp, &rel_entry, sizeof(int32_t));
 }
-
+// TODO Protect les memcpy
 static void		create_woody(t_file *file, t_woody *woody, size_t *inject_index)
 {
-	if (woody->data && woody->data->p_filesz != woody->data->p_memsz)
+	size_t		file_index;
+
+	*inject_index = get_uint64(woody->data->p_offset, file->endian)
+		+ get_uint64(woody->data->p_filesz, file->endian);
+	file_index = *inject_index;
+	ft_memcpy(woody->ptr, file->ptr, *inject_index);
+	if (woody->data && get_uint64(woody->data->p_filesz, file->endian)
+		!= get_uint64(woody->data->p_memsz, file->endian))
 	{
-		*inject_index = woody->data->p_offset + woody->data->p_filesz;
-		ft_memcpy(woody->ptr, file->ptr, *inject_index);
-		ft_bzero(woody->ptr + *inject_index, woody->data->p_memsz
-			- woody->data->p_filesz);
-		*inject_index += woody->data->p_memsz - woody->data->p_filesz;
+		ft_bzero(woody->ptr + *inject_index, get_uint64(woody->data->p_memsz,
+			file->endian) - get_uint64(woody->data->p_filesz, file->endian));
+		*inject_index += get_uint64(woody->data->p_memsz, file->endian)
+			- get_uint64(woody->data->p_filesz, file->endian);
 		woody->data = woody->ptr + ((void *)woody->data - file->ptr);
 		woody->data->p_filesz = woody->data->p_memsz;
-		return ;
 	}
-	*inject_index = woody->data->p_offset + woody->data->p_filesz;
-	ft_memcpy(woody->ptr, file->ptr, *inject_index);
+	if (woody->last != woody->data)
+	{
+		*inject_index += get_uint64(woody->last->p_offset, file->endian)
+			+ get_uint64(woody->last->p_filesz, file->endian) - file_index;
+		ft_memcpy(woody->ptr + *inject_index, file->ptr + file_index,
+			get_uint64(woody->last->p_offset, file->endian)
+			+ get_uint64(woody->last->p_filesz, file->endian) - file_index);
+	}
+	woody->last = woody->ptr + ((void *)woody->last - file->ptr);
 }
 
 void			inject(t_file *file, t_payload *payload)
@@ -54,86 +85,26 @@ void			inject(t_file *file, t_payload *payload)
 	size_t		inject_index;
 
 	if (!(woody.last = get_last_load_segment(file)))
-		return ;
+		return (woody_error(file, payload, NULL, ERROR_PH_TRUNC));
 	woody.data = get_segment(file, is_data);
 	if (!woody.data)
 		woody.data = woody.last;
-	woody.size = woody.last->p_offset + woody.last->p_filesz + payload->size
+	woody.size = get_uint64(woody.last->p_offset, file->endian)
+		+ get_uint64(woody.last->p_filesz, file->endian) + payload->size
 		+ (woody.data->p_memsz - woody.data->p_filesz);
+	errno = 0;
 	if (!(woody.ptr = malloc(woody.size)))
-		return ;
-	format_payload(file, payload, (woody.last->p_vaddr + woody.last->p_memsz));
+		return (woody_error(file, payload, &woody, ERROR_ERRNO));
+	format_payload(file, payload, get_uint64(woody.last->p_vaddr, file->endian)
+		+ get_uint64(woody.last->p_memsz, file->endian));
 	create_woody(file, &woody, &inject_index);
 	ft_memcpy(woody.ptr + inject_index, payload->code, payload->size);
-	((Elf64_Ehdr *)woody.ptr)->e_entry = (woody.last->p_vaddr + woody.last->p_memsz);
-	woody.data->p_flags |= PF_X;
-	save_file(file, woody.ptr, woody.size);
+	((Elf64_Ehdr *)woody.ptr)->e_entry = (get_uint64(woody.last->p_vaddr,
+		file->endian) + get_uint64(woody.last->p_memsz, file->endian));
+	woody.last->p_filesz += get_uint64(payload->size, file->endian);
+	woody.last->p_memsz += get_uint64(payload->size, file->endian);
+	woody.last->p_flags |= PF_X;
+	if (save_file(woody.ptr, woody.size) == EXIT_FAILURE)
+		return (woody_error(file, payload, &woody, ERROR_ERRNO));
+	free(woody.ptr);
 }
-
-// void			update_header(t_file *file, Elf64_Shdr *sect)
-// {
-// 	Elf64_Ehdr	*hdr;
-
-// 	hdr = file->ptr;
-// 	hdr->e_shnum++;
-// 	hdr->e_entry = sect->sh_addr;
-// }
-
-// void			update_section(Elf64_Shdr *sect, t_file *file,
-// 					t_payload *payload, off_t addr_offset)
-// {
-// 	char	*strtab;
-
-// 	sect->sh_offset = file->size + sizeof(Elf64_Shdr);
-// 	sect->sh_addr = sect->sh_offset + addr_offset;
-// 	sect->sh_size = payload->size;
-// 	if (!(strtab = get_section_strtab(file)))
-// 		return ;
-// 	if (strtab[sect->sh_name] == '.')
-// 		sect->sh_name++;
-// }
-
-// void			add_section(t_file *file, t_payload *payload)
-// {
-// 	Elf64_Shdr	*sect;
-// 	off_t		addr_offset;
-// 	void		*map;
-// 	char		*code;
-	
-// 	if (!(map = malloc(sizeof(Elf64_Shdr) + payload->size + 1)))
-// 		return ;
-// 	get_text_sect(file);
-// 	sect = map;
-// 	code = (char *)(sect + 1);
-// 	ft_memcpy(sect, file->text, sizeof(Elf64_Shdr));
-// 	extend_last_load_segment(file, payload, &addr_offset);
-// 	give_text_write_right(file);
-// 	update_section(sect, file, payload, addr_offset);
-// 	format_payload(file, payload, sect->sh_addr);
-// 	update_header(file, sect);
-// 	ft_memcpy(code, payload->code, payload->size);
-// 	code[payload->size] = 0;
-// 	save_file(file, map, payload->size + sizeof(Elf64_Shdr) + 1);
-// }
-
-// void		inject(t_file *file, t_payload *payload)
-// {
-// 	Elf64_Shdr	*sect;
-// 	off_t		addr_offset;
-// 	char		*code;
-
-// 	sect = get_last_section(file);
-// 	if (!(sect->sh_flags & SHF_EXECINSTR))
-// 		return (add_section(file, payload));
-// 	if (!(code = malloc(payload->size + 1)))
-// 		return ;
-// 	get_text_sect(file);
-// 	extend_last_load_segment(file, payload, &addr_offset);
-// 	give_text_write_right(file);
-// 	format_payload(file, payload, file->size + addr_offset);
-// 	sect->sh_size += payload->size;
-// 	((Elf64_Ehdr *)file->ptr)->e_entry = file->size + addr_offset;
-// 	ft_memcpy(code, payload->code, payload->size);
-// 	code[payload->size] = 0;
-// 	save_file(file, code, payload->size + 1);
-// }

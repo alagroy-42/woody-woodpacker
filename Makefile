@@ -6,7 +6,7 @@
 #    By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 13:46:17 by alagroy-          #+#    #+#              #
-#    Updated: 2021/05/27 15:30:12 by alagroy-         ###   ########.fr        #
+#    Updated: 2021/05/28 15:16:12 by alagroy-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,8 +24,7 @@ INCLUDES = $(INCLUDES_DIR) $(LIB_DIR)includes/
 OBJS_DIR = ./.objs/
 LIBFT = $(LIB_DIR)libft.a
 
-SRC_FILES = main.c check_file.c error.c endian.c sections.c encryption.c decryption.c \
-			segment.c injection.c
+SRC_FILES = main.c check_file.c error.c endian.c encryption.c segment.c injection.c
 ASM_FILES = encrypt.s
 OBJ_FILES = $(SRC_FILES:.c=.o)
 OBJ_FILES += $(ASM_FILES:.s=.o)
