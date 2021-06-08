@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/29 13:49:16 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/28 15:56:59 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/06/08 10:30:13 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static void	get_key(t_file *file)
 	ft_putstr("encryption key : 0x");
 	i = -1;
 	while (++i < KEY_SIZE)
-		printf("%hhx", file->key[i]);
+		printf("%02hhx", file->key[i]);
 	fflush(NULL);
 	ft_putchar('\n');
 }

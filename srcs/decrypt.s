@@ -1,9 +1,9 @@
 BITS 64
 
 segment .text
-	global test
+	global decrypt
 
-test:
+decrypt:
 	push rax
 	push rsi
 	push rdi
@@ -22,19 +22,19 @@ end_code:
 	mov rsi, 4 ; key_size 
 	lea rdx, [rel routine] ; text
 	xor r8, r8 ; key_index
-	xor r9, r9 ; key_offset
+	xor rax, rax ; key_offset
 	jmp key
 back_key:
 	pop rdi ; key
 routine:
-	movzx rax, byte [rdi + r8]
-	add rax, r9
-	xor [rdx], rax
+	mov al, byte [rdi + r8]
+	add al, ah
+	xor [rdx], al
 	inc rdx
 	inc r8
 	cmp r8, rsi
 	jne loopinstr
-	add r9, byte 43
+	add ah, byte 42
 	xor r8, r8
 loopinstr:
 	loop routine

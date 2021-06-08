@@ -6,7 +6,7 @@
 /*   By: alagroy- <alagroy-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/20 14:17:38 by alagroy-          #+#    #+#             */
-/*   Updated: 2021/05/28 15:52:55 by alagroy-         ###   ########.fr       */
+/*   Updated: 2021/06/08 10:44:20 by alagroy-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@ static void	format_payload_32(t_file *file, t_payload *payload,
 	hdr = file->ptr;
 	last_entry = get_uint32(hdr->e_entry, file->endian);
 	rel_entry = last_entry - (entry_addr + payload->i_jmp + sizeof(int32_t));
-	rel_text = get_uint32(((Elf32_Phdr *)file->text)->p_vaddr, file->endian) - (entry_addr + payload->i_text + sizeof(int32_t));
+	rel_text = get_uint32(entry_addr + payload->i_text - 2
+		- get_uint32(((Elf32_Phdr *)file->text)->p_vaddr, file->endian), file->endian);
 	filesz = get_uint32(((Elf32_Phdr *)file->text)->p_filesz, file->endian);
 	key_size = KEY_SIZE;
 	ft_memcpy(payload->code + payload->i_tsize, &filesz, sizeof(uint32_t));
@@ -63,7 +64,8 @@ static void	format_payload(t_file *file, t_payload *payload,
 	hdr = file->ptr;
 	last_entry = get_uint64(hdr->e_entry, file->endian);
 	rel_entry = last_entry - (entry_addr + payload->i_jmp + sizeof(int32_t));
-	rel_text = get_uint64(((Elf64_Phdr *)file->text)->p_vaddr, file->endian) - (entry_addr + payload->i_text + sizeof(int32_t));
+	rel_text = get_uint64(((Elf64_Phdr *)file->text)->p_vaddr, file->endian)
+		- (entry_addr + payload->i_text + sizeof(int32_t));
 	filesz = get_uint64(((Elf64_Phdr *)file->text)->p_filesz, file->endian);
 	key_size = KEY_SIZE;
 	ft_memcpy(payload->code + payload->i_tsize, &filesz, sizeof(uint32_t));
